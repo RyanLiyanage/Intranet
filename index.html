@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Liyanage Intranet</title>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Interactive Dashboard Background</title>
+<style>
+  body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    background: #d0d8e0; /* slightly darker light background */
+    font-family: Arial, sans-serif;
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* Canvas behind everything and does not capture mouse events */
+  #bgCanvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 0; /* behind everything */
+    pointer-events: none; /* <--- FIX: allows clicks through canvas */
+  }
+
+  /* Dashboard content */
+  .dashboard {
+    position: relative;
+    z-index: 1; /* in front of canvas */
+    padding: 20px;
+  }
+
+  button {
+    padding: 12px 25px;
+    margin: 10px;
+    font-size: 16px;
+    cursor: pointer;
+    border: none;
+    border-radius: 8px;
+    background-color: #4a90e2;
+    color: white;
+    transition: transform 0.2s, background-color 0.2s;
+  }
+
+  button:hover {
+    background-color: #357ABD;
+    transform: scale(1.05);
+  }
+</style>
+</head>
+<body>
+
+<canvas id="bgCanvas"></canvas>
+
+
+
+<script>
+const canvas = document.getElementById('bgCanvas');
+const ctx = canvas.getContext('2d');
+let width = canvas.width = window.innerWidth;
+let height = canvas.height = window.innerHeight;
+let mouse = { x: null, y: null, radius: 100 };
+
+window.addEventListener('mousemove', function(event){
+    mouse.x = event.x;
+    mouse.y = event.y;
+});
+
+class Circle {
+    constructor() {
+        this.x = Math.random() * width;
+        this.y = Math.random() * height;
+        this.radius = Math.random() * 20 + 10;
+        this.baseRadius = this.radius;
+        this.speedX = (Math.random() - 0.5) * 0.5;
+        this.speedY = (Math.random() - 0.5) * 0.5;
+        this.color = `rgba(255, 255, 255, ${Math.random() * 0.3 + 0.2})`;
+    }
+    draw() {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI*2);
+        ctx.fillStyle = this.color;
+        ctx.fill();
+    }
+    update() {
+        this.x += this.speedX;
+        this.y += this.speedY;
+
+        if(this.x < -this.radius) this.x = width + this.radius;
+        if(this.x > width + this.radius) this.x = -this.radius;
+        if(this.y < -this.radius) this.y = height + this.radius;
+        if(this.y > height + this.radius) this.y = -this.radius;
+
+        // Hover repulsion effect (canvas doesn't block buttons anymore)
+        let dx = mouse.x - this.x;
+        let dy = mouse.y - this.y;
+        let distance = Math.sqrt(dx*dx + dy*dy);
+        if(distance < mouse.radius){
+            let angle = Math.atan2(dy, dx);
+            let force = (mouse.radius - distance) / 20;
+            this.x -= Math.cos(angle) * force;
+            this.y -= Math.sin(angle) * force;
+        }
+
+        this.draw();
+    }
+}
+
+const circles = [];
+for(let i=0; i<50; i++){
+    circles.push(new Circle());
+}
+
+function animate(){
+    ctx.clearRect(0,0,width,height);
+    circles.forEach(c => c.update());
+    requestAnimationFrame(animate);
+}
+
+animate();
+
+window.addEventListener('resize', ()=>{
+    width = canvas.width = window.innerWidth;
+    height = canvas.height = window.innerHeight;
+});
+</script>
+
+</body>
+</html>
+<style>
+    body {
+        margin: 0;
+        font-family: 'Roboto', sans-serif;
+        background: linear-gradient(270deg, #f0f4f8, #ffffff, #e6f2ff);
+        background-size: 600% 600%;
+        animation: gradientBG 15s ease infinite;
+        color: #333;
+    }
+    @keyframes gradientBG {
+        0%{background-position:0% 50%}
+        50%{background-position:100% 50%}
+        100%{background-position:0% 50%}
+    }
+    header {
+        background: #ffffffcc;
+        padding: 10px 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        position: fixed;
+        width: 100%;
+        top: 0;
+        z-index: 100;
+    }
+    header h1 {
+        font-weight: 700;
+        font-size: 1.8em;
+        color: #1a237e;
+        margin: 0;
+    }
+    .container {
+        margin-top: 100px;
+        padding: 20px;
+    }
+    .category-btn {
+        display: inline-block;
+        margin: 10px;
+        padding: 15px 25px;
+        font-size: 1.1em;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        background: #1a237e;
+        color: #fff;
+        transition: 0.3s;
+    }
+    .category-btn:hover {
+        background: #3949ab;
+    }
+    .links-section {
+        display: none;
+        margin-top: 20px;
+    }
+    .links-grid {
+        display: flex;
+        flex-wrap: wrap;
+    }
+    .link-card {
+        width: 120px;
+        margin: 10px;
+        text-align: center;
+    }
+    .link-card img {
+        width: 64px;
+        height: 64px;
+        margin-bottom: 5px;
+    }
+    .widget {
+        display: flex;
+        gap: 20px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+    }
+    .widget div {
+        background: #ffffffcc;
+        padding: 10px 15px;
+        border-radius: 10px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        min-width: 120px;
+        text-align: center;
+    }
+    .timer-display {
+        font-size: 1.2em;
+        font-weight: bold;
+    }
+</style>
+</head>
+<body>
+
+<header>
+    <h1>Liyanage Intranet</h1>
+</header>
+
+<div class="container">
+
+    <!-- Widgets: Clock, Stopwatch, Timer -->
+    <div class="widget">
+        <div>
+            <div>Time</div>
+            <div id="clock" class="timer-display"></div>
+        </div>
+        <div>
+            <div>Stopwatch</div>
+            <div id="stopwatch" class="timer-display">00:00:00</div>
+            <button onclick="startStopwatch()">Start</button>
+            <button onclick="pauseStopwatch()">Pause</button>
+            <button onclick="resetStopwatch()">Reset</button>
+        </div>
+        <div>
+            <div>Timer</div>
+            <div id="timer" class="timer-display">00:00</div>
+            <input type="number" id="timerInput" placeholder="Minutes" style="width:60px;">
+            <button onclick="startTimer()">Start</button>
+            <button onclick="resetTimer()">Reset</button>
+        </div>
+    </div>
+
+    <!-- Category Buttons -->
+    <div>
+        <button class="category-btn" onclick="showCategory('education')">Education</button>
+        <button class="category-btn" onclick="showCategory('social')">Social Media</button>
+        <button class="category-btn" onclick="showCategory('banking')">Banking</button>
+        <button class="category-btn" onclick="showCategory('shopping')">Shopping</button>
+        <button class="category-btn" onclick="showCategory('typing')">Typing</button>
+        <button class="category-btn" onclick="showCategory('docs')">Docs/Work</button>
+        <button class="category-btn" onclick="showCategory('news')">News</button>
+        <button class="category-btn" onclick="showCategory('tools')">Tools</button>
+    </div>
+
+    <!-- Links Sections -->
+    <div id="education" class="links-section">
+        <h2>Education</h2>
+        <div class="links-grid">
+            <div class="link-card"><a href="https://www.typing.com" target="_blank"><img src="https://www.typing.com/favicon.ico"><div>Typing.com</div></a></div>
+            <div class="link-card"><a href="https://www.bursttyping.com" target="_blank"><img src="https://www.bursttyping.com/favicon.ico"><div>Burst Typing</div></a></div>
+            <div class="link-card"><a href="https://www.speedtypingonline.com" target="_blank"><img src="https://www.speedtypingonline.com/favicon.ico"><div>Speed Typing Online</div></a></div>
+            <div class="link-card"><a href="https://www.edpass.com.au" target="_blank"><img src="https://www.edpass.com.au/favicon.ico"><div>EDPASS</div></a></div>
+            <div class="link-card"><a href="https://www.google.com" target="_blank"><img src="https://www.google.com/favicon.ico"><div>Google</div></a></div>
+            <div class="link-card"><a href="https://www.mcgill.sa.edu.au" target="_blank"><img src="https://www.mcgill.sa.edu.au/favicon.ico"><div>Magill School</div></a></div>
+            <div class="link-card"><a href="https://www.glenunga.sa.edu.au" target="_blank"><img src="https://www.glenunga.sa.edu.au/favicon.ico"><div>Glenunga School</div></a></div>
+            <div class="link-card"><a href="https://www.khanacademy.org" target="_blank"><img src="https://www.khanacademy.org/favicon.ico"><div>Khan Academy</div></a></div>
+            <div class="link-card"><a href="https://www.classroom.google.com" target="_blank"><img src="https://www.gstatic.com/classroom/favicon.png"><div>Google Classroom</div></a></div>
+            <div class="link-card"><a href="https://www.readingeggs.com.au" target="_blank"><img src="https://www.readingeggs.com.au/favicon.ico"><div>Reading Eggs</div></a></div>
+            <div class="link-card"><a href="https://www.acceleratedreader.com" target="_blank"><img src="https://global-zone60.renaissance-go.com/favicon.ico"><div>Accelerated Reader</div></a></div>
+            <div class="link-card"><a href="https://www.classdojo.com" target="_blank"><img src="https://www.classdojo.com/favicon.ico"><div>ClassDojo</div></a></div>
+            <div class="link-card"><a href="https://www.speldsa.org.au" target="_blank"><img src="https://www.speldsa.org.au/favicon.ico"><div>SPELD SA</div></a></div>
+            <div class="link-card"><a href="https://www.fireflyeducation.com.au" target="_blank"><img src="https://www.fireflyeducation.com.au/favicon.ico"><div>Firefly Ed</div></a></div>
+            <div class="link-card"><a href="https://www.acer.edu.au" target="_blank"><img src="https://www.acer.edu.au/favicon.ico"><div>ACER</div></a></div>
+        </div>
+    </div>
+
+    <div id="social" class="links-section">
+        <h2>Social Media</h2>
+        <div class="links-grid">
+            <div class="link-card"><a href="https://www.tiktok.com" target="_blank"><img src="https://www.tiktok.com/favicon.ico"><div>TikTok</div></a></div>
+            <div class="link-card"><a href="https://www.snapchat.com" target="_blank"><img src="https://www.snapchat.com/favicon.ico"><div>Snapchat</div></a></div>
+            <div class="link-card"><a href="https://www.facebook.com" target="_blank"><img src="https://www.facebook.com/favicon.ico"><div>Facebook</div></a></div>
+            <div class="link-card"><a href="https://www.instagram.com" target="_blank"><img src="https://www.instagram.com/favicon.ico"><div>Instagram</div></a></div>
+            <div class="link-card"><a href="https://www.twitter.com" target="_blank"><img src="https://www.twitter.com/favicon.ico"><div>Twitter</div></a></div>
+            <div class="link-card"><a href="https://www.youtube.com" target="_blank"><img src="https://www.youtube.com/favicon.ico"><div>YouTube</div></a></div>
+            <div class="link-card"><a href="https://www.linkedin.com" target="_blank"><img src="https://www.linkedin.com/favicon.ico"><div>LinkedIn</div></a></div>
+            <div class="link-card"><a href="https://www.reddit.com" target="_blank"><img src="https://www.reddit.com/favicon.ico"><div>Reddit</div></a></div>
+            <div class="link-card"><a href="https://www.discord.com" target="_blank"><img src="https://www.discord.com/favicon.ico"><div>Discord</div></a></div>
+            <div class="link-card"><a href="https://www.pinterest.com" target="_blank"><img src="https://www.pinterest.com/favicon.ico"><div>Pinterest</div></a></div>
+            <div class="link-card"><a href="https://www.tumblr.com" target="_blank"><img src="https://www.tumblr.com/favicon.ico"><div>Tumblr</div></a></div>
+            <div class="link-card"><a href="https://www.snapchat.com/add" target="_blank"><img src="https://www.snapchat.com/favicon.ico"><div>Snapchat Add</div></a></div>
+            <div class="link-card"><a href="https://www.tiktok.com/login" target="_blank"><img src="https://www.tiktok.com/favicon.ico"><div>TikTok Login</div></a></div>
+            <div class="link-card"><a href="https://www.facebook.com/messages" target="_blank"><img src="https://www.facebook.com/favicon.ico"><div>Messenger</div></a></div>
+            <div class="link-card"><a href="https://www.instagram.com/direct/inbox/" target="_blank"><img src="https://www.instagram.com/favicon.ico"><div>Instagram DM</div></a></div>
+        </div>
+    </div>
+
+    <div id="banking" class="links-section">
+        <h2>Banking</h2>
+        <div class="links-grid">
+            <div class="link-card"><a href="https://www.nab.com.au" target="_blank"><img src="https://www.nab.com.au/favicon.ico"><div>NAB</div></a></div>
+            <div class="link-card"><a href="https://www.ing.com.au" target="_blank"><img src="https://www.ing.com.au/favicon.ico"><div>ING</div></a></div>
+            <div class="link-card"><a href="https://www.commbank.com.au" target="_blank"><img src="https://www.commbank.com.au/favicon.ico"><div>CommBank</div></a></div>
+            <div class="link-card"><a href="https://www.commonwealthbank.com.au" target="_blank"><img src="https://www.commonwealthbank.com.au/favicon.ico"><div>Commonwealth</div></a></div>
+            <div class="link-card"><a href="https://www.me.com.au" target="_blank"><img src="https://www.me.com.au/favicon.ico"><div>ME Bank</div></a></div>
+            <div class="link-card"><a href="https://www.westpac.com.au" target="_blank"><img src="https://www.westpac.com.au/favicon.ico"><div>Westpac</div></a></div>
+            <div class="link-card"><a href="https://www.anz.com.au" target="_blank"><img src="https://www.anz.com.au/favicon.ico"><div>ANZ</div></a></div>
+            <div class="link-card"><a href="https://www.bankwest.com.au" target="_blank"><img src="https://www.bankwest.com.au/favicon.ico"><div>BankWest</div></a></div>
+            <div class="link-card"><a href="https://www.suncorp.com.au" target="_blank"><img src="https://www.suncorp.com.au/favicon.ico"><div>Suncorp</div></a></div>
+            <div class="link-card"><a href="https://www.bendigobank.com.au" target="_blank"><img src="https://www.bendigobank.com.au/favicon.ico"><div>Bendigo</div></a></div>
+            <div class="link-card"><a href="https://www.rabobank.com.au" target="_blank"><img src="https://www.rabobank.com.au/favicon.ico"><div>Rabobank</div></a></div>
+            <div class="link-card"><a href="https://www.creditunion.com.au" target="_blank"><img src="https://www.creditunion.com.au/favicon.ico"><div>Credit Union</div></a></div>
+            <div class="link-card"><a href="https://www.boq.com.au" target="_blank"><img src="https://www.boq.com.au/favicon.ico"><div>BOQ</div></a></div>
+            <div class="link-card"><a href="https://www.stgeorge.com.au" target="_blank"><img src="https://www.stgeorge.com.au/favicon.ico"><div>St George</div></a></div>
+            <div class="link-card"><a href="https://www.citibank.com.au" target="_blank"><img src="https://www.citibank.com.au/favicon.ico"><div>CitiBank</div></a></div>
+        </div>
+    </div>
+
+    <!-- Shopping -->
+    <div id="shopping" class="links-section">
+        <h2>Shopping</h2>
+        <div class="links-grid">
+            <div class="link-card"><a href="https://www.amazon.com" target="_blank"><img src="https://www.amazon.com/favicon.ico"><div>Amazon</div></a></div>
+            <div class="link-card"><a href="https://www.temu.com" target="_blank"><img src="https://www.temu.com/favicon.ico"><div>Temu</div></a></div>
+            <div class="link-card"><a href="https://www.ebay.com" target="_blank"><img src="https://www.ebay.com/favicon.ico"><div>eBay</div></a></div>
+            <div class="link-card"><a href="https://www.woolworths.com.au" target="_blank"><img src="https://www.woolworths.com.au/favicon.ico"><div>Woolworths</div></a></div>
+            <div class="link-card"><a href="https://www.coles.com.au" target="_blank"><img src="https://www.coles.com.au/favicon.ico"><div>Coles</div></a></div>
+            <div class="link-card"><a href="https://www.target.com.au" target="_blank"><img src="https://www.target.com.au/favicon.ico"><div>Target</div></a></div>
+            <div class="link-card"><a href="https://www.bigw.com.au" target="_blank"><img src="https://www.bigw.com.au/favicon.ico"><div>Big W</div></a></div>
+            <div class="link-card"><a href="https://www.kmart.com.au" target="_blank"><img src="https://www.kmart.com.au/favicon.ico"><div>Kmart</div></a></div>
+            <div class="link-card"><a href="https://www.ebgames.com.au" target="_blank"><img src="https://www.ebgames.com.au/favicon.ico"><div>EB Games</div></a></div>
+            <div class="link-card"><a href="https://www.officeworks.com.au" target="_blank"><img src="https://www.officeworks.com.au/favicon.ico"><div>Officeworks</div></a></div>
+            <div class="link-card"><a href="https://www.catch.com.au" target="_blank"><img src="https://www.catch.com.au/favicon.ico"><div>Catch</div></a></div>
+            <div class="link-card"><a href="https://www.chemistwarehouse.com.au" target="_blank"><img src="https://www.chemistwarehouse.com.au/favicon.ico"><div>Chemist Warehouse</div></a></div>
+            <div class="link-card"><a href="https://www.jbhifi.com.au" target="_blank"><img src="https://www.jbhifi.com.au/favicon.ico"><div>JB Hi-Fi</div></a></div>
+            <div class="link-card"><a href="https://www.myer.com.au" target="_blank"><img src="https://www.myer.com.au/favicon.ico"><div>Myer</div></a></div>
+            <div class="link-card"><a href="https://www.davidjones.com" target="_blank"><img src="https://www.davidjones.com/favicon.ico"><div>David Jones</div></a></div>
+        </div>
+    </div>
+
+    <!-- Typing -->
+    <div id="typing" class="links-section">
+        <h2>Typing</h2>
+        <div class="links-grid">
+            <div class="link-card"><a href="https://www.typing.com" target="_blank"><img src="https://www.typing.com/favicon.ico"><div>Typing.com</div></a></div>
+            <div class="link-card"><a href="https://www.bursttyping.com" target="_blank"><img src="https://www.bursttyping.com/favicon.ico"><div>Burst Typing</div></a></div>
+            <div class="link-card"><a href="https://www.speedtypingonline.com" target="_blank"><img src="https://www.speedtypingonline.com/favicon.ico"><div>Speed Typing Online</div></a></div>
+            <div class="link-card"><a href="https://www.keybr.com" target="_blank"><img src="https://www.keybr.com/favicon.ico"><div>KeyBR</div></a></div>
+            <div class="link-card"><a href="https://10fastfingers.com" target="_blank"><img src="https://10fastfingers.com/favicon.ico"><div>10FastFingers</div></a></div>
+            <div class="link-card"><a href="https://www.ratatype.com" target="_blank"><img src="https://www.ratatype.com/favicon.ico"><div>Ratatype</div></a></div>
+            <div class="link-card"><a href="https://www.typingclub.com" target="_blank"><img src="https://www.typingclub.com/favicon.ico"><div>Typing Club</div></a></div>
+            <div class="link-card"><a href="https://www.typingstudy.com" target="_blank"><img src="https://www.typingstudy.com/favicon.ico"><div>Typing Study</div></a></div>
+            <div class="link-card"><a href="https://www.typing.academy" target="_blank"><img src="https://www.typing.academy/favicon.ico"><div>Typing Academy</div></a></div>
+            <div class="link-card"><a href="https://www.typingonline.com" target="_blank"><img src="https://www.typingonline.com/favicon.ico"><div>Typing Online</div></a></div>
+            <div class="link-card"><a href="https://www.keyhero.com" target="_blank"><img src="https://www.keyhero.com/favicon.ico"><div>KeyHero</div></a></div>
+            <div class="link-card"><a href="https://www.speedtypingonline.com" target="_blank"><img src="https://www.speedtypingonline.com/favicon.ico"><div>Speed Typing Online</div></a></div>
+            <div class="link-card"><a href="https://www.typingtest.com" target="_blank"><img src="https://www.typingtest.com/favicon.ico"><div>Typing Test</div></a></div>
+            <div class="link-card"><a href="https://www.typingmaster.com" target="_blank"><img src="https://www.typingmaster.com/favicon.ico"><div>Typing Master</div></a></div>
+            <div class="link-card"><a href="https://www.typinggames.zone" target="_blank"><img src="https://www.typinggames.zone/favicon.ico"><div>Typing Games</div></a></div>
+        </div>
+    </div>
+
+    <!-- Docs / Work -->
+    <div id="docs" class="links-section">
+        <h2>Docs / Work</h2>
+        <div class="links-grid">
+            <div class="link-card"><a href="https://docs.google.com" target="_blank"><img src="https://www.google.com/favicon.ico"><div>Google Docs</div></a></div>
+            <div class="link-card"><a href="https://sheets.google.com" target="_blank"><img src="https://www.google.com/favicon.ico"><div>Google Sheets</div></a></div>
+            <div class="link-card"><a href="https://slides.google.com" target="_blank"><img src="https://www.google.com/favicon.ico"><div>Google Slides</div></a></div>
+            <div class="link-card"><a href="https://www.office.com/word" target="_blank"><img src="https://www.microsoft.com/favicon.ico"><div>Word Online</div></a></div>
+            <div class="link-card"><a href="https://www.office.com/excel" target="_blank"><img src="https://www.microsoft.com/favicon.ico"><div>Excel Online</div></a></div>
+            <div class="link-card"><a href="https://www.office.com/powerpoint" target="_blank"><img src="https://www.microsoft.com/favicon.ico"><div>PowerPoint Online</div></a></div>
+            <div class="link-card"><a href="https://www.onedrive.com" target="_blank"><img src="https://www.microsoft.com/favicon.ico"><div>OneDrive</div></a></div>
+            <div class="link-card"><a href="https://www.office.com" target="_blank"><img src="https://www.microsoft.com/favicon.ico"><div>Microsoft Office</div></a></div>
+            <div class="link-card"><a href="https://www.slideshare.net" target="_blank"><img src="https://www.slideshare.net/favicon.ico"><div>SlideShare</div></a></div>
+            <div class="link-card"><a href="https://www.dropbox.com" target="_blank"><img src="https://www.dropbox.com/favicon.ico"><div>Dropbox</div></a></div>
+            <div class="link-card"><a href="https://www.notion.so" target="_blank"><img src="https://www.notion.so/favicon.ico"><div>Notion</div></a></div>
+            <div class="link-card"><a href="https://www.evernote.com" target="_blank"><img src="https://www.evernote.com/favicon.ico"><div>Evernote</div></a></div>
+            <div class="link-card"><a href="https://www.todoist.com" target="_blank"><img src="https://www.todoist.com/favicon.ico"><div>Todoist</div></a></div>
+            <div class="link-card"><a href="https://www.trello.com" target="_blank"><img src="https://www.trello.com/favicon.ico"><div>Trello</div></a></div>
+            <div class="link-card"><a href="https://www.asana.com" target="_blank"><img src="https://www.asana.com/favicon.ico"><div>Asana</div></a></div>
+        </div>
+    </div>
+
+    <!-- News -->
+    <div id="news" class="links-section">
+        <h2>News</h2>
+        <div class="links-grid">
+            <div class="link-card"><a href="https://www.abc.net.au/news/" target="_blank"><img src="https://www.abc.net.au/news/favicon.ico"><div>ABC News</div></a></div>
+            <div class="link-card"><a href="https://www.smh.com.au" target="_blank"><img src="https://www.smh.com.au/favicon.ico"><div>SMH</div></a></div>
+            <div class="link-card"><a href="https://www.theguardian.com/au" target="_blank"><img src="https://www.theguardian.com/favicon.ico"><div>The Guardian</div></a></div>
+            <div class="link-card"><a href="https://www.news.com.au" target="_blank"><img src="https://www.news.com.au/favicon.ico"><div>News.com.au</div></a></div>
+            <div class="link-card"><a href="https://www.bbc.com/news" target="_blank"><img src="https://www.bbc.com/favicon.ico"><div>BBC</div></a></div>
+            <div class="link-card"><a href="https://www.cnn.com" target="_blank"><img src="https://www.cnn.com/favicon.ico"><div>CNN</div></a></div>
+            <div class="link-card"><a href="https://www.nytimes.com" target="_blank"><img src="https://www.nytimes.com/favicon.ico"><div>NY Times</div></a></div>
+            <div class="link-card"><a href="https://www.theage.com.au" target="_blank"><img src="https://www.theage.com.au/favicon.ico"><div>The Age</div></a></div>
+            <div class="link-card"><a href="https://www.heraldsun.com.au" target="_blank"><img src="https://www.heraldsun.com.au/favicon.ico"><div>Herald Sun</div></a></div>
+            <div class="link-card"><a href="https://www.9news.com.au" target="_blank"><img src="https://www.9news.com.au/favicon.ico"><div>9News</div></a></div>
+            <div class="link-card"><a href="https://www.7news.com.au" target="_blank"><img src="https://www.7news.com.au/favicon.ico"><div>7News</div></a></div>
+            <div class="link-card"><a href="https://www.sbs.com.au/news" target="_blank"><img src="https://www.sbs.com.au/favicon.ico"><div>SBS News</div></a></div>
+            <div class="link-card"><a href="https://www.theaustralian.com.au" target="_blank"><img src="https://www.theaustralian.com.au/favicon.ico"><div>The Australian</div></a></div>
+            <div class="link-card"><a href="https://www.financialreview.com" target="_blank"><img src="https://www.afr.com/favicon.ico"><div>AFR</div></a></div>
+            <div class="link-card"><a href="https://www.businessinsider.com.au" target="_blank"><img src="https://www.businessinsider.com/favicon.ico"><div>Business Insider</div></a></div>
+        </div>
+    </div>
+
+    <!-- Tools -->
+    <div id="tools" class="links-section">
+        <h2>Tools</h2>
+        <div class="links-grid">
+            <div class="link-card"><a href="https://www.calculator.com" target="_blank"><img src="https://www.calculator.com/favicon.ico"><div>Calculator</div></a></div>
+            <div class="link-card"><a href="https://www.convertunits.com" target="_blank"><img src="https://www.convertunits.com/favicon.ico"><div>Unit Converter</div></a></div>
+            <div class="link-card"><a href="https://www.timeanddate.com" target="_blank"><img src="https://www.timeanddate.com/favicon.ico"><div>Time & Date</div></a></div>
+            <div class="link-card"><a href="https://www.weather.com" target="_blank"><img src="https://www.weather.com/favicon.ico"><div>Weather</div></a></div>
+            <div class="link-card"><a href="https://www.7-zip.org" target="_blank"><img src="https://www.7-zip.org/favicon.ico"><div>7-Zip</div></a></div>
+            <div class="link-card"><a href="https://www.pdfescape.com" target="_blank"><img src="https://www.pdfescape.com/favicon.ico"><div>PDF Escape</div></a></div>
+            <div class="link-card"><a href="https://www.canva.com" target="_blank"><img src="https://www.canva.com/favicon.ico"><div>Canva</div></a></div>
+            <div class="link-card"><a href="https://www.figma.com" target="_blank"><img src="https://www.figma.com/favicon.ico"><div>Figma</div></a></div>
+            <div class="link-card"><a href="https://www.desmos.com" target="_blank"><img src="https://www.desmos.com/favicon.ico"><div>Desmos</div></a></div>
+            <div class="link-card"><a href="https://www.geogebra.org" target="_blank"><img src="https://www.geogebra.org/favicon.ico"><div>GeoGebra</div></a></div>
+            <div class="link-card"><a href="https://www.codecademy.com" target="_blank"><img src="https://www.codecademy.com/favicon.ico"><div>Codecademy</div></a></div>
+            <div class="link-card"><a href="https://www.wolframalpha.com" target="_blank"><img src="https://www.wolframalpha.com/favicon.ico"><div>WolframAlpha</div></a></div>
+            <div class="link-card"><a href="https://www.stackoverflow.com" target="_blank"><img src="https://stackoverflow.com/favicon.ico"><div>Stack Overflow</div></a></div>
+            <div class="link-card"><a href="https://www.github.com" target="_blank"><img src="https://github.com/favicon.ico"><div>GitHub</div></a></div>
+            <div class="link-card"><a href="https://www.repl.it" target="_blank"><img src="https://repl.it/favicon.ico"><div>Repl.it</div></a></div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+function showCategory(cat) {
+    let sections = document.querySelectorAll('.links-section');
+    sections.forEach(s => s.style.display = 'none');
+    document.getElementById(cat).style.display = 'block';
+}
+
+// Clock
+function updateClock() {
+    const now = new Date();
+    document.getElementById('clock').textContent = now.toLocaleTimeString();
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// Stopwatch
+let swInterval, swTime = 0;
+function startStopwatch() {
+    clearInterval(swInterval);
+    swInterval = setInterval(() => {
+        swTime++;
+        let h = Math.floor(swTime/3600).toString().padStart(2,'0');
+        let m = Math.floor(swTime%3600/60).toString().padStart(2,'0');
+        let s = (swTime%60).toString().padStart(2,'0');
+        document.getElementById('stopwatch').textContent = `${h}:${m}:${s}`;
+    },1000);
+}
+function pauseStopwatch(){ clearInterval(swInterval); }
+function resetStopwatch(){ clearInterval(swInterval); swTime=0; document.getElementById('stopwatch').textContent='00:00:00'; }
+
+// Timer
+let timerInterval, timerTime = 0;
+function startTimer(){
+    clearInterval(timerInterval);
+    let mins = parseInt(document.getElementById('timerInput').value)||0;
+    timerTime = mins*60;
+    timerInterval = setInterval(()=>{
+        if(timerTime<=0){ clearInterval(timerInterval); return; }
+        timerTime--;
+        let m=Math.floor(timerTime/60).toString().padStart(2,'0');
+        let s=(timerTime%60).toString().padStart(2,'0');
+        document.getElementById('timer').textContent=`${m}:${s}`;
+    },1000);
+}
+function resetTimer(){ clearInterval(timerInterval); timerTime=0; document.getElementById('timer').textContent='00:00'; }
+</script>
+
+</body>
+</html>
